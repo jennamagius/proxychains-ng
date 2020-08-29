@@ -232,7 +232,7 @@ static int tunnel_to(int sock, ip_type ip, unsigned short port, proxy_type pt, c
 			#define HTTP_AUTH_MAX ((0xFF * 2) + 1 + 1) /* 2 * 0xff: username and pass, plus 1 for ':' and 1 for zero terminator. */
 			char src[HTTP_AUTH_MAX];
 			char dst[(4 * HTTP_AUTH_MAX)];
-			if(ulen) {
+			if(ulen || passlen) {
 				snprintf(src, sizeof(src), "%s:%s", user, pass);
 				encode_base_64(src, dst, sizeof(dst));
 			} else dst[0] = 0;
@@ -242,8 +242,8 @@ static int tunnel_to(int sock, ip_type ip, unsigned short port, proxy_type pt, c
 			               "CONNECT %s:%d HTTP/1.0\r\nHost: %s:%d\r\n%s%s%s\r\n",
 			                dns_name, hs_port,
 			                dns_name, hs_port,
-			                ulen ? "Proxy-Authorization: Basic " : dst,
-			                dst, ulen ? "\r\n" : dst);
+				        ulen || passlen ? "Proxy-Authorization: Basic " : dst,
+				        dst, ulen || passlen ? "\r\n" : dst);
 
 			if(len < 0 || len != send(sock, buff, len, 0))
 				goto err;
